@@ -766,10 +766,6 @@
     <div class="loader-text" id="loaderText">読み込み中...</div>
   </div>
 
-  <div class="disclaimer-top">
-    ※当サイトは@MatsuMoriPikkanが運営する非公式ファンサイトです。不具合や不明点があればXにてDMお願いいたします。
-  </div>
-
   <header>
     <div class="header-container">
       <div class="header-left">
@@ -781,12 +777,12 @@
         <a href="#" class="site-title" onclick="scrollToTop(event)">
           <img src="icon/yosiko.jpg" alt="アイコン" class="site-header-icon" onerror="this.style.display='none'">
           松田里奈ちゃん専用 生写真管理ツール
-          <span class="app-version">v4.3.0</span>
+          <span class="app-version">v5.1.1</span>
         </a>
       </div>
       <div class="user-area">
-        <button class="btn-auth btn-backup-export" onclick="openBackupModal()">データバックアップ</button>
-        <button class="btn-auth btn-backup-import" onclick="openBackupModal()">データを復旧</button>
+        <button class="btn-auth btn-backup-export" onclick="openExportModal()">データバックアップ</button>
+        <button class="btn-auth btn-backup-import" onclick="openImportModal()">データを復旧</button>
       </div>
     </div>
   </header>
@@ -803,7 +799,9 @@
       <li class="menu-nav-item"><button onclick="switchTabFromMenu('missing')">未所持の生写真一覧💭</button></li>
       <li class="menu-nav-item"><button onclick="switchTabFromMenu('trade')">トレード管理🔁</button></li>
       <li class="menu-nav-item"><button onclick="switchTabFromMenu('schedule')">トレード予定📅</button></li>
-      <li class="menu-nav-item" style="margin-top: 10px;"><button onclick="openHelpModal()" style="background:#EFF6FF; color:#1E40AF; border-color:#BFDBFE;"> 当ツールの使い方</button></li>
+      <li class="menu-nav-item" style="margin-top: 10px;"><button onclick="openExportModalFromMenu()" style="background:#ECFDF5; color:#065F46; border-color:#A7F3D0;">データバックアップ📦</button></li>
+      <li class="menu-nav-item"><button onclick="openImportModalFromMenu()" style="background:#EFF6FF; color:#1E40AF; border-color:#BFDBFE;">データを復旧🔄</button></li>
+      <li class="menu-nav-item" style="margin-top: 10px;"><button onclick="openHelpModal()" style="background:#F8FAFC; color:var(--text-dark);"> 当ツールの使い方</button></li>
       <li class="menu-nav-item"><button onclick="openPrivacyModal()"> プライバシーポリシー</button></li>
     </ul>
   </aside>
@@ -993,30 +991,46 @@
     </div>
   </div>
 
-  <!-- バックアップ＆復旧 モーダル -->
-  <div class="modal-backdrop" id="backupModal" onclick="closeBackupModalOnBackdrop(event)">
+  <!-- バックアップ専用 モーダル -->
+  <div class="modal-backdrop" id="exportModal" onclick="closeExportModalOnBackdrop(event)">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title">📦 データバックアップ・復旧</div>
-        <button class="btn-close-menu" onclick="closeBackupModal()">×</button>
+        <div class="modal-title">📦 データバックアップ（コード書き出し）</div>
+        <button class="btn-close-menu" onclick="closeExportModal()">×</button>
       </div>
       <div class="modal-body">
-        <h4 style="margin-top:0;">1. バックアップ（データのコピー）</h4>
-        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">以下のコードをコピーし、スマホの「メモ」アプリやファイル等に貼り付けて保存してください。</p>
-        <textarea id="backupJsonOutput" class="output-text" readonly style="height:110px;"></textarea>
-        <div style="margin-top:8px; text-align:right;">
+        <p style="font-size:0.85rem; color:var(--text-main); margin-bottom:10px;">
+          以下のバックアップコードをコピーし、iPhoneの「メモ」アプリやメール等に貼り付けて保存してください。
+        </p>
+        <textarea id="exportJsonOutput" class="output-text" readonly style="height:160px;"></textarea>
+        <div style="margin-top:12px; text-align:right;">
           <button class="btn-trade-action" onclick="copyBackupText()">バックアップコードをコピー</button>
-        </div>
-
-        <h4 style="margin-top:20px;">2. 復旧（テキストからの復元）</h4>
-        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">以前保存したバックアップコードを下の欄に貼り付けて「データを復旧する」を押してください。</p>
-        <textarea id="importJsonInput" class="output-text" placeholder="ここにバックアップコードを貼り付けてください..." style="height:90px;"></textarea>
-        <div style="margin-top:8px; text-align:right;">
-          <button class="btn-trade-action" style="background:var(--accent-blue);" onclick="importBackupFromText()">テキストからデータを復旧する</button>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-auth" onclick="closeBackupModal()">閉じる</button>
+        <button class="btn-auth" onclick="closeExportModal()">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- データ復旧専用 モーダル -->
+  <div class="modal-backdrop" id="importModal" onclick="closeImportModalOnBackdrop(event)">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">🔄 データの復旧（コード読み込み）</div>
+        <button class="btn-close-menu" onclick="closeImportModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem; color:var(--text-main); margin-bottom:10px;">
+          以前保存したバックアップコードを下のテキストエリアに貼り付けて、「データを復旧する」ボタンを押してください。
+        </p>
+        <textarea id="importJsonInput" class="output-text" placeholder="ここにバックアップコードを貼り付けてください..." style="height:160px;"></textarea>
+        <div style="margin-top:12px; text-align:right;">
+          <button class="btn-trade-action" style="background:var(--accent-blue);" onclick="importBackupFromText()">データを復旧する</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-auth" onclick="closeImportModal()">閉じる</button>
       </div>
     </div>
   </div>
@@ -1029,7 +1043,7 @@
       </div>
       <div class="modal-body">
         <div class="notice-box">
-          <strong>🔒 データの保管場所について</strong>
+          <strong>【重要】データの保管場所について</strong>
           本ツールはサーバーへのデータ送信を一切行いません。登録した所持枚数・アップロード画像・トレード予定などすべてのデータは、ご利用の<strong>ブラウザ内（LocalStorage）にのみ保存</strong>されます。
         </div>
 
@@ -1059,12 +1073,6 @@
 
         <h4>2. データの管理とセキュリティ</h4>
         <p>所持データおよびバックアップデータはお使いの端末・ブラウザ内にのみ保存・管理されます。必要に応じて「データバックアップ」機能を利用し、テキストを安全な場所に保管してください。</p>
-
-        <h4>3. 画像データおよび著作権について</h4>
-        <p>当サイトは個人のファンが運営する非公式サイトです。サイト内に掲載されているすべての生写真に関する権利は、公式運営元および権利者に帰属します。</p>
-
-        <h4>4. 免責事項</h4>
-        <p>当ツールの利用により生じたトラブルや損害等について、運営者は一切の責任を負いかねますのであらかじめご了承ください。</p>
       </div>
       <div class="modal-footer">
         <button class="btn-auth" onclick="closePrivacyModal()">閉じる</button>
@@ -1087,7 +1095,7 @@
         <p>各生写真カードの「＋」「−」ボタンを押して所持枚数を変更できます。「一括✓」を押すと全ポーズ所持状態になります。</p>
 
         <h4>3. 自前の写真画像を登録</h4>
-        <p>「生写真画像を表示」にチェックを入れるとプレビューが表示され、「画像を登録」ボタンから自分のお持ちの写真を読み込むことができます。<br>※画像は高画質のままそのまま保存されます。</p>
+        <p>「生写真画像を表示」にチェックを入れるとプレビューが表示され、「画像を登録」ボタンから自分のお持ちの写真を読み込むことができます。</p>
 
         <h4>4. トレード募集文の作成</h4>
         <p>「トレード管理」タブから求める生写真にチェックを入れて「トレード文を生成」を押すと、X（旧Twitter）投稿用の交換文章を自動生成・コピーできます。</p>
@@ -1102,8 +1110,9 @@
   </div>
 
   <footer>
-    松田里奈生写真 - 松田里奈 生写真管理ツール (非公式ファンコンテンツ)<br>
-    ※当サイトは個人が運営する非公式サイトであり、株式会社Seed & Flowerおよび関係各所とは一切関係ございません。<br>
+    - 松田里奈 生写真管理ツール -<br>
+    ※当ツールは@MatsuMoriPikkanが運営する非公式サイトであり、株式会社Seed & Flowerおよび関係各所とは一切関係ございません。<br>
+    不具合や不明点があればX(旧Twitter)のDMにてお問い合わせください。<br>
     <a onclick="openPrivacyModal()">プライバシーポリシー</a>
   </footer>
 
@@ -1381,25 +1390,30 @@
       alert('ブラウザ内にデータを保存しました！');
     }
 
-    /* バックアップモーダル開閉 & テキスト生成・復旧処理 */
-    function openBackupModal() {
-      const outputArea = document.getElementById('backupJsonOutput');
+    /* --- バックアップ（書き出し）モーダル関数 --- */
+    function openExportModal() {
+      const outputArea = document.getElementById('exportJsonOutput');
       if (outputArea) {
         outputArea.value = JSON.stringify(window.userState);
       }
-      document.getElementById('backupModal').classList.add('active');
+      document.getElementById('exportModal').classList.add('active');
     }
 
-    function closeBackupModal() {
-      document.getElementById('backupModal').classList.remove('active');
+    function closeExportModal() {
+      document.getElementById('exportModal').classList.remove('active');
     }
 
-    function closeBackupModalOnBackdrop(e) {
-      if (e.target.id === 'backupModal') closeBackupModal();
+    function closeExportModalOnBackdrop(e) {
+      if (e.target.id === 'exportModal') closeExportModal();
+    }
+
+    function openExportModalFromMenu() {
+      toggleMenuDrawer(false);
+      openExportModal();
     }
 
     function copyBackupText() {
-      const outputArea = document.getElementById('backupJsonOutput');
+      const outputArea = document.getElementById('exportJsonOutput');
       if (outputArea && outputArea.value.trim()) {
         navigator.clipboard.writeText(outputArea.value).then(() => {
           alert('バックアップコードをコピーしました！メモアプリなどに貼り付けて保存してください。');
@@ -1411,6 +1425,26 @@
       } else {
         alert('コピーするデータがありません。');
       }
+    }
+
+    /* --- 復旧（読み込み）モーダル関数 --- */
+    function openImportModal() {
+      const inputArea = document.getElementById('importJsonInput');
+      if (inputArea) inputArea.value = '';
+      document.getElementById('importModal').classList.add('active');
+    }
+
+    function closeImportModal() {
+      document.getElementById('importModal').classList.remove('active');
+    }
+
+    function closeImportModalOnBackdrop(e) {
+      if (e.target.id === 'importModal') closeImportModal();
+    }
+
+    function openImportModalFromMenu() {
+      toggleMenuDrawer(false);
+      openImportModal();
     }
 
     function importBackupFromText() {
@@ -1432,7 +1466,7 @@
           renderMissingPhotos();
           renderTradeScheduleList();
           updateDashboard();
-          closeBackupModal();
+          closeImportModal();
           inputArea.value = '';
           alert('データの復旧が完了しました！');
         } else {
