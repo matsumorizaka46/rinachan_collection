@@ -766,6 +766,10 @@
     <div class="loader-text" id="loaderText">読み込み中...</div>
   </div>
 
+  <div class="disclaimer-top">
+    ※当サイトは@MatsuMoriPikkanが運営する非公式ファンサイトです。不具合や不明点があればXにてDMお願いいたします。
+  </div>
+
   <header>
     <div class="header-container">
       <div class="header-left">
@@ -777,13 +781,12 @@
         <a href="#" class="site-title" onclick="scrollToTop(event)">
           <img src="icon/yosiko.jpg" alt="アイコン" class="site-header-icon" onerror="this.style.display='none'">
           松田里奈ちゃん専用 生写真管理ツール
-          <span class="app-version">v5.0.0</span>
+          <span class="app-version">v4.3.0</span>
         </a>
       </div>
       <div class="user-area">
-        <button class="btn-auth btn-backup-export" onclick="exportDataBackup()">データバックアップ</button>
-        <button class="btn-auth btn-backup-import" onclick="document.getElementById('importBackupInput').click()">バックアップを復旧</button>
-        <input type="file" id="importBackupInput" accept=".json" style="display:none;" onchange="importDataBackup(this)">
+        <button class="btn-auth btn-backup-export" onclick="openBackupModal()">データバックアップ</button>
+        <button class="btn-auth btn-backup-import" onclick="openBackupModal()">データを復旧</button>
       </div>
     </div>
   </header>
@@ -990,7 +993,35 @@
     </div>
   </div>
 
-  <!-- 初回訪問時 注意事項 モーダル -->
+  <!-- バックアップ＆復旧 モーダル -->
+  <div class="modal-backdrop" id="backupModal" onclick="closeBackupModalOnBackdrop(event)">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">📦 データバックアップ・復旧</div>
+        <button class="btn-close-menu" onclick="closeBackupModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <h4 style="margin-top:0;">1. バックアップ（データのコピー）</h4>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">以下のコードをコピーし、スマホの「メモ」アプリやファイル等に貼り付けて保存してください。</p>
+        <textarea id="backupJsonOutput" class="output-text" readonly style="height:110px;"></textarea>
+        <div style="margin-top:8px; text-align:right;">
+          <button class="btn-trade-action" onclick="copyBackupText()">バックアップコードをコピー</button>
+        </div>
+
+        <h4 style="margin-top:20px;">2. 復旧（テキストからの復元）</h4>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">以前保存したバックアップコードを下の欄に貼り付けて「データを復旧する」を押してください。</p>
+        <textarea id="importJsonInput" class="output-text" placeholder="ここにバックアップコードを貼り付けてください..." style="height:90px;"></textarea>
+        <div style="margin-top:8px; text-align:right;">
+          <button class="btn-trade-action" style="background:var(--accent-blue);" onclick="importBackupFromText()">テキストからデータを復旧する</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-auth" onclick="closeBackupModal()">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 初回注意事項 モーダル -->
   <div class="modal-backdrop" id="firstNoticeModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -998,16 +1029,16 @@
       </div>
       <div class="modal-body">
         <div class="notice-box">
-          <strong>【重要】データの保管場所について</strong>
-          本ツールはサーバーへのデータ送信を一切行いません。登録した所持枚数・アップロード画像・トレード予定などすべてのデータは、ご利用のブラウザ内にのみ保存されます。
+          <strong>🔒 データの保管場所について</strong>
+          本ツールはサーバーへのデータ送信を一切行いません。登録した所持枚数・アップロード画像・トレード予定などすべてのデータは、ご利用の<strong>ブラウザ内（LocalStorage）にのみ保存</strong>されます。
         </div>
 
         <h4>1. データの消失にご注意ください</h4>
-        <p>ブラウザのキャッシュ削除、プライベートモードの使用、またはスマホの機種変更やブラウザのアップデートなどにより、保存されたデータが消失する場合があります。</p>
+        <p>ブラウザのキャッシュ削除、プライベートモードの使用、またはスマホの機種変更やブラウザのアップデートなどにより、保存されたデータが消えてしまう場合があります。</p>
 
         <h4 style="color:#2563EB;">2. 定期的なバックアップを強く推奨します</h4>
-        <p>大量のデータを登録した際や、大事な記録を残すためには、画面右上の「<strong>データバックアップ</strong>」ボタンから定期的にバックアップファイルをダウンロード保存してください。</p>
-        <p>万が一データが消えてしまっても、「バックアップを復旧」ボタンからいつでも元の状態に戻すことができます。</p>
+        <p>大量のデータを登録した際や、大事な記録を残すためには、画面上の「<strong>データバックアップ</strong>」ボタンからテキストコードをコピーし、メモアプリ等に保存してください。</p>
+        <p>万が一データが消えてしまっても、保存したコードを貼り付けることでいつでも元の状態に戻すことができます。</p>
       </div>
       <div class="modal-footer" style="text-align: center;">
         <button class="btn-auth btn-save-batch" style="width: 100%; padding: 12px 20px; font-size: 0.95rem;" onclick="acceptFirstNotice()">注意事項を確認し、利用を開始する</button>
@@ -1027,8 +1058,13 @@
         <p>本ツールでは、お使いのブラウザ内（LocalStorage）に所持枚数・登録画像・トレード予定データを一時的に保管します。データは外部サーバー等に自動送信されることはありません。</p>
 
         <h4>2. データの管理とセキュリティ</h4>
-        <p>所持データおよびバックアップデータはお使いの端末・ブラウザ内にのみ保存・管理されます。必要に応じて「データバックアップ」機能を利用し、ファイルを安全な場所に保管してください。</p>
+        <p>所持データおよびバックアップデータはお使いの端末・ブラウザ内にのみ保存・管理されます。必要に応じて「データバックアップ」機能を利用し、テキストを安全な場所に保管してください。</p>
 
+        <h4>3. 画像データおよび著作権について</h4>
+        <p>当サイトは個人のファンが運営する非公式サイトです。サイト内に掲載されているすべての生写真に関する権利は、公式運営元および権利者に帰属します。</p>
+
+        <h4>4. 免責事項</h4>
+        <p>当ツールの利用により生じたトラブルや損害等について、運営者は一切の責任を負いかねますのであらかじめご了承ください。</p>
       </div>
       <div class="modal-footer">
         <button class="btn-auth" onclick="closePrivacyModal()">閉じる</button>
@@ -1045,7 +1081,7 @@
       </div>
       <div class="modal-body">
         <h4>1. 自動保存とデータバックアップ</h4>
-        <p>データはお使いのブラウザに即座に自動保存されます。機種変更時やデータ消去時に備えて、画面右上の「データバックアップ」ボタンから定期的にバックアップファイルを保存してください。データの復旧は「バックアップを復旧」ボタンから行えます。</p>
+        <p>データはお使いのブラウザに即座に自動保存されます。機種変更時やデータ消去時に備えて、画面上の「データバックアップ」ボタンからテキストコードをコピーして保存してください。</p>
 
         <h4>2. 所持枚数の記録</h4>
         <p>各生写真カードの「＋」「−」ボタンを押して所持枚数を変更できます。「一括✓」を押すと全ポーズ所持状態になります。</p>
@@ -1066,9 +1102,8 @@
   </div>
 
   <footer>
-    - 松田里奈 生写真管理ツール (非公式ツール)- <br>
-    ※当サイトは@MatsuMoriPikkanが運営する非公式ツールであり、株式会社Seed & Flowerおよび関係各所とは一切関係ございません。<br>
-    不具合や不明点があればX(旧Twitter)のDMへお問い合わせください。<br>
+    松田里奈生写真 - 松田里奈 生写真管理ツール (非公式ファンコンテンツ)<br>
+    ※当サイトは個人が運営する非公式サイトであり、株式会社Seed & Flowerおよび関係各所とは一切関係ございません。<br>
     <a onclick="openPrivacyModal()">プライバシーポリシー</a>
   </footer>
 
@@ -1119,7 +1154,7 @@
       { id: 'sakura_ban_mv', name: '「BAN」MVロケーション衣装', kana: 'ばんえむぶいろけーしょんいしょう', group: '櫻坂', type: '通常', year: 2021 },
       { id: 'sakura_ban_tv', name: '「BAN」歌番組衣装', kana: 'ばんうたばんぐみいしょう', group: '櫻坂', type: '通常', year: 2021 },
       { id: 'sakura_yukata_2021', name: '2021年 浴衣衣装', kana: '2021ねんゆかたいしょう', group: '櫻坂', type: '通常', year: 2021 },
-      { id: 'sakura_summer_casual_2021', name: '2021年 夏私服コーディネート衣装', kana: '2021ねんなつしふくこーでぃねーとおしょう', group: '櫻坂', type: '通常', year: 2021 },
+      { id: 'sakura_summer_casual_2021', name: '2021年 夏私服コーディネート衣装', kana: '2021ねんなつふ,ふくこーでぃねーとおしょう', group: '櫻坂', type: '通常', year: 2021 },
       { id: 'funiu_3rd_nagaredama', name: '3rd「流れ弾」封入', kana: '3rdながれだまふんにゅう', group: '櫻坂', type: '封入', year: 2021 },
       { id: 'sakura_nagaredama_mv', name: '「流れ弾」MVロケーション衣装', kana: 'ながれだまえむぶいろけーしょんいしょう', group: '櫻坂', type: '通常', year: 2021 },
       { id: 'sakura_santa_2021', name: '2021年サンタ衣装', kana: '2021ねんさんたいしょう', group: '櫻坂', type: '通常', year: 2021 },
@@ -1346,55 +1381,67 @@
       alert('ブラウザ内にデータを保存しました！');
     }
 
-    /* バックアップ機能 (JSON書き出し & 復旧) */
-    function exportDataBackup() {
-      try {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.userState));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `matsuda_photo_backup_${new Date().toISOString().slice(0, 10)}.json`);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-      } catch (e) {
-        console.error("バックアップ保存エラー:", e);
-        alert("バックアップファイルの作成に失敗しました。");
+    /* バックアップモーダル開閉 & テキスト生成・復旧処理 */
+    function openBackupModal() {
+      const outputArea = document.getElementById('backupJsonOutput');
+      if (outputArea) {
+        outputArea.value = JSON.stringify(window.userState);
+      }
+      document.getElementById('backupModal').classList.add('active');
+    }
+
+    function closeBackupModal() {
+      document.getElementById('backupModal').classList.remove('active');
+    }
+
+    function closeBackupModalOnBackdrop(e) {
+      if (e.target.id === 'backupModal') closeBackupModal();
+    }
+
+    function copyBackupText() {
+      const outputArea = document.getElementById('backupJsonOutput');
+      if (outputArea && outputArea.value.trim()) {
+        navigator.clipboard.writeText(outputArea.value).then(() => {
+          alert('バックアップコードをコピーしました！メモアプリなどに貼り付けて保存してください。');
+        }).catch(err => {
+          console.error("コピー失敗:", err);
+          outputArea.select();
+          alert('テキストエリアを選択しました。手動でコピーしてください。');
+        });
+      } else {
+        alert('コピーするデータがありません。');
       }
     }
 
-    function importDataBackup(input) {
-      if (!input.files || !input.files[0]) return;
-      const file = input.files[0];
-      const reader = new FileReader();
-
-      showLoader("バックアップデータを復旧中...");
-      reader.onload = (e) => {
-        try {
-          const importedData = JSON.parse(e.target.result);
-          if (importedData && typeof importedData === 'object') {
-            window.userState = {
-              counts: importedData.counts || {},
-              images: importedData.images || {},
-              tradeSchedules: importedData.tradeSchedules || []
-            };
-            saveLocalState();
-            renderPhotos();
-            renderMissingPhotos();
-            renderTradeScheduleList();
-            updateDashboard();
-            hideLoader();
-            alert('データの復旧が完了しました！');
-          } else {
-            throw new Error("無効なファイルフォーマットです。");
-          }
-        } catch (err) {
-          hideLoader();
-          console.error("復旧処理エラー:", err);
-          alert("バックアップファイルの読み込みに失敗しました。ファイルが正しくありません。");
+    function importBackupFromText() {
+      const inputArea = document.getElementById('importJsonInput');
+      if (!inputArea || !inputArea.value.trim()) {
+        alert('復旧用のコードが入力されていません。');
+        return;
+      }
+      try {
+        const importedData = JSON.parse(inputArea.value.trim());
+        if (importedData && typeof importedData === 'object') {
+          window.userState = {
+            counts: importedData.counts || {},
+            images: importedData.images || {},
+            tradeSchedules: importedData.tradeSchedules || []
+          };
+          saveLocalState();
+          renderPhotos();
+          renderMissingPhotos();
+          renderTradeScheduleList();
+          updateDashboard();
+          closeBackupModal();
+          inputArea.value = '';
+          alert('データの復旧が完了しました！');
+        } else {
+          throw new Error("無効なフォーマットです。");
         }
-        input.value = '';
-      };
-      reader.readAsText(file);
+      } catch (err) {
+        console.error("復旧処理エラー:", err);
+        alert('コードの読み込みに失敗しました。正しいバックアップコードかご確認ください。');
+      }
     }
 
     /* 無断画像保存・右クリック・長押し無効化処理 */
